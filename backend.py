@@ -10,11 +10,15 @@ import sys
 import time
 import socket
 import struct
-import fcntl
 import subprocess
 import threading
 import json
 from typing import Dict, List, Optional, Tuple, Any
+
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 try:
     from openrgb import OpenRGBClient
@@ -187,6 +191,8 @@ class MSIMysticLightDirect:
         return None
 
     def is_available(self) -> bool:
+        if fcntl is None:
+            return False
         node = self.find_device_node()
         if node and os.path.exists(node):
             self.device_path = node
@@ -196,10 +202,13 @@ class MSIMysticLightDirect:
     def _read_packet(self, fd: int) -> bytearray:
         buf = bytearray(185)
         buf[0] = 0x52
-        fcntl.ioctl(fd, HIDIOCGFEATURE(185), buf)
+        if fcntl is not None:
+            fcntl.ioctl(fd, HIDIOCGFEATURE(185), buf)
         return buf
 
     def _write_packet(self, fd: int, buf: bytearray, save: bool = True):
+        if fcntl is None:
+            return
         # 1. Live volatile commit (save_data = 0)
         buf[184] = 0
         fcntl.ioctl(fd, HIDIOCSFEATURE(185), buf)
@@ -490,11 +499,15 @@ class FanLightBackend:
             return False
 
         try:
+            popen_kwargs: Dict[str, Any] = {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
+            if sys.platform != "win32" and hasattr(os, "setpgrp"):
+                popen_kwargs["preexec_fn"] = os.setpgrp
+            elif sys.platform == "win32":
+                popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
             self.server_proc = subprocess.Popen(
                 [self.appimage_path, "--server", "--server-port", str(self.port), "--startminimized"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                preexec_fn=os.setpgrp,
+                **popen_kwargs
             )
             for _ in range(10):
                 time.sleep(0.5)
@@ -548,7 +561,10 @@ class FanLightBackend:
                     pass
                 self.server_proc = None
 
-            subprocess.run(["pkill", "-f", "OpenRGB.*--server"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if sys.platform == "win32":
+                subprocess.run(["taskkill", "/F", "/IM", "OpenRGB.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                subprocess.run(["pkill", "-f", "OpenRGB.*--server"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             time.sleep(1)
 
         return self.connect()

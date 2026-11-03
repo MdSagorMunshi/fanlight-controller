@@ -1,0 +1,130 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x86_64 Executable
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Windows Executable
+        run: |
+          pyinstaller --clean --onefile --windowed --name fanlight-studio-windows-x86_64 --add-data "assets;assets" main.py
+
+      - name: Archive Windows Release
+        run: |
+          mkdir release-win
+          copy dist\fanlight-studio-windows-x86_64.exe release-win\
+          copy README.md release-win\
+          copy LICENSE release-win\
+          Compress-Archive -Path release-win\* -DestinationPath fanlight-studio-v1.0.0-windows-x86_64.zip
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fanlight-studio-windows-x86_64
+          path: fanlight-studio-v1.0.0-windows-x86_64.zip
+
+  build-linux:
+    name: Build Linux x86_64 Binaries & Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y dpkg-dev
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Linux Standalone Executable
+        run: |
+          pyinstaller --clean --onefile --windowed --name fanlight-studio-linux-x86_64 --add-data "assets:assets" main.py
+
+      - name: Build Debian (.deb) Package
+        run: |
+          mkdir -p pkg/DEBIAN pkg/usr/bin pkg/usr/share/applications pkg/usr/share/icons/hicolor/128x128/apps pkg/etc/udev/rules.d
+          
+          cat << 'EOF' > pkg/DEBIAN/control
+          Package: fanlight-studio
+          Version: 1.0.0
+          Architecture: amd64
+          Maintainer: FanLight Studio Contributors
+          Section: utils
+          Priority: optional
+          Homepage: https://github.com/MdSagorMunshi/fanlight-controller
+          Description: Next-Generation Linux Desktop Lighting Deck for MSI AM5 & DDR5 RAM RGB
+          EOF
+          
+          cat << 'EOF' > pkg/DEBIAN/postinst
+          #!/bin/sh
+          set -e
+          if command -v udevadm >/dev/null 2>&1; then
+              udevadm control --reload-rules || true
+              udevadm trigger || true
+          fi
+          exit 0
+          EOF
+          chmod 755 pkg/DEBIAN/postinst
+
+          cp dist/fanlight-studio-linux-x86_64 pkg/usr/bin/fanlight-studio
+          chmod 755 pkg/usr/bin/fanlight-studio
+          cp assets/icon.png pkg/usr/share/icons/hicolor/128x128/apps/fanlight-studio.png
+          cp FanLightControl.desktop pkg/usr/share/applications/FanLightControl.desktop
+
+          cat << 'EOF' > pkg/etc/udev/rules.d/60-msi-mysticlight.rules
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0076", MODE="0666", TAG+="uaccess"
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0080", MODE="0666", TAG+="uaccess"
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0083", MODE="0666", TAG+="uaccess"
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0087", MODE="0666", TAG+="uaccess"
+          KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0666"
+          EOF
+
+          dpkg-deb --root-owner-group --build pkg fanlight-studio_1.0.0_amd64.deb
+
+      - name: Build Tarball
+        run: |
+          mkdir -p release-linux/fanlight-studio
+          cp dist/fanlight-studio-linux-x86_64 release-linux/fanlight-studio/fanlight-studio
+          cp install.sh release-linux/fanlight-studio/
+          cp README.md release-linux/fanlight-studio/
+          cp LICENSE release-linux/fanlight-studio/
+          cp -r assets release-linux/fanlight-studio/
+          tar -czf fanlight-studio-v1.0.0-linux-x86_64.tar.gz -C release-linux fanlight-studio
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            dist/fanlight-studio-linux-x86_64
+            fanlight-studio_1.0.0_amd64.deb
+            fanlight-studio-v1.0.0-linux-x86_64.tar.gz

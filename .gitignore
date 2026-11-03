@@ -31,3 +31,12 @@ ENV/
 *.AppImage
 state.json
 *.tmp
+build_pyinstaller/
+dist/
+dist_bin/
+pkg_deb/
+release_staging/
+*.spec
+*.deb
+*.tar.gz
+*.zip
