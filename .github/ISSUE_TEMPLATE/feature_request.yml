@@ -1,0 +1,54 @@
+name: 💡 Feature Request
+description: Suggest an idea, new lighting effect, hardware profile, or UI improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make FanLight Studio even better? Tell us what you'd love to see!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🎯 Problem or Opportunity
+      description: Is your feature request related to a problem or a gap in current functionality?
+      placeholder: e.g. Currently, effects run at fixed speed intervals, or I want an audio-reactive visualizer mode.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: 🚀 Proposed Solution
+      description: A clear and concise description of what you want to happen.
+      placeholder: e.g. Add a microphone input audio visualizer that modulates the brightness and hue based on system audio levels.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 🏷️ Feature Category
+      options:
+        - New Dynamic Lighting Effect
+        - Motherboard / Controller Hardware Support
+        - UI / UX / Visualizer Enhancement
+        - CLI / Automation / Daemon Feature
+        - Audio / Temperature Reactive Sync
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternative Approaches
+      description: Any alternative solutions or features you've considered?
+      placeholder: e.g. OpenRGB plugins, custom shell scripts, etc.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📌 Additional Context
+      description: Add any mockups, screenshots, or protocol references that might help.

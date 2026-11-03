@@ -1,0 +1,72 @@
+name: 🎮 Hardware Compatibility Report
+description: Submit a new verified motherboard, RAM kit, or ARGB controller to expand the compatibility list.
+title: "[Hardware]: Tested on <Motherboard Model>"
+labels: ["hardware-verified"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing FanLight Studio on your rig! Reporting successful hardware tests helps other Linux gamers know their board is supported.
+
+  - type: input
+    id: motherboard
+    attributes:
+      label: 🖥️ Motherboard Model & Chipset
+      description: Run `cat /sys/class/dmi/id/board_name`.
+      placeholder: e.g. MSI MAG B650 TOMAHAWK WIFI, MSI PRO B650M-P, etc.
+    validations:
+      required: true
+
+  - type: input
+    id: bios_version
+    attributes:
+      label: ⚙️ BIOS / Firmware Version
+      description: Run `cat /sys/class/dmi/id/bios_version` and `cat /sys/class/dmi/id/bios_date`.
+      placeholder: e.g. 7D75v1E (2026/04/10)
+    validations:
+      required: true
+
+  - type: input
+    id: cpu
+    attributes:
+      label: 🧠 Processor (CPU)
+      placeholder: e.g. AMD Ryzen 7 7800X3D
+    validations:
+      required: true
+
+  - type: input
+    id: ram
+    attributes:
+      label: 💾 RAM Memory Kit (Model & Controller)
+      placeholder: e.g. Corsair Vengeance RGB DDR5 32GB (ENE DRAM controller at i2c address 0x72)
+
+  - type: input
+    id: mcu_info
+    attributes:
+      label: 🔌 MSI USB Controller (VID:PID)
+      description: Run `lsusb | grep -i msi` or `cat /sys/class/hidraw/*/device/uevent | grep -i 0db0`.
+      placeholder: e.g. 0DB0:0076 (MSI MYSTIC LIGHT)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: working_features
+    attributes:
+      label: 🎯 Working Features
+      options:
+        - label: Case Fans (JARGB_V2_1 / JARGB_V2_2) light up and change colors
+          required: true
+        - label: DDR5 / DDR4 RAM RGB lights up and changes colors
+          required: false
+        - label: Lighting modes (Rainbow, Breathing, etc.) function smoothly
+          required: true
+        - label: Master power toggle (ON / OFF) works
+          required: true
+        - label: Brightness and Speed sliders respond
+          required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 📝 Observations or Special Notes
+      description: Any specific steps or quirks (e.g. required specific kernel parameter, i2c module, etc.)?

@@ -229,6 +229,18 @@ echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c-dev.conf
 
 ---
 
+## 🤝 Contributing
+
+We welcome contributions from the hardware and open-source community! Whether you are adding support for another MSI motherboard model, fixing a driver quirk, creating new lighting animations, or improving documentation:
+
+- 📖 **Contribution Guidelines**: Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide for local environment setup, architecture notes, and code style.
+- 🐛 **Report a Bug**: Use our [Bug Report Form](https://github.com/MdSagorMunshi/fanlight-controller/issues/new?template=bug_report.yml) to submit detailed hardware logs.
+- 💡 **Request a Feature**: Propose new lighting modes or integrations via our [Feature Request Form](https://github.com/MdSagorMunshi/fanlight-controller/issues/new?template=feature_request.yml).
+- 🎮 **Submit Tested Hardware**: Tested FanLight Studio on your motherboard? Report it using the [Hardware Compatibility Form](https://github.com/MdSagorMunshi/fanlight-controller/issues/new?template=hardware_compatibility.yml) to expand our verified matrix.
+- 🔀 **Submit a Pull Request**: Check out our [PR Template](.github/pull_request_template.md) to ensure your changes are ready for review.
+
+---
+
 ## 📄 License
 
 Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
