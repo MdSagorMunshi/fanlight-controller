@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows x86_64 Executable
+    name: Build Windows Packages (x86_64 & ARM64)
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -28,25 +28,87 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build Windows Executable
+      - name: Build Windows x86_64 Executable
         run: |
           pyinstaller --clean --onefile --windowed --name fanlight-studio-windows-x86_64 --add-data "assets;assets" main.py
 
-      - name: Archive Windows Release
+      - name: Package Windows x86_64 Portable Bundle
         run: |
-          mkdir release-win
-          copy dist\fanlight-studio-windows-x86_64.exe release-win\
-          copy README.md release-win\
-          copy LICENSE release-win\
-          Compress-Archive -Path release-win\* -DestinationPath fanlight-studio-v1.0.0-windows-x86_64.zip
+          mkdir -p release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\assets
+          copy dist\fanlight-studio-windows-x86_64.exe release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          xcopy /E /I /Y assets release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\assets
+          copy main.py release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          copy ui.py release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          copy widgets.py release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          copy backend.py release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          copy requirements.txt release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          copy README.md release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          copy LICENSE release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\
+          
+          @"
+          @echo off
+          title FanLight Studio
+          where python >nul 2>nul
+          if %ERRORLEVEL% NEQ 0 (
+              echo [ERROR] Python 3 is not found in PATH!
+              pause
+              exit /b 1
+          )
+          python -m pip install -q -r requirements.txt
+          start pythonw main.py
+          exit /b 0
+          "@ | Out-File -Encoding ASCII release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\run_fanlight.bat
 
-      - name: Upload Windows Artifact
+          @"
+          Set WshShell = CreateObject("WScript.Shell")
+          WshShell.Run "pythonw.exe main.py", 0, False
+          "@ | Out-File -Encoding ASCII release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64\launch_silent.vbs
+
+          Compress-Archive -Path release-staging\fanlight-studio-v1.0.0-windows-portable-x86_64 -DestinationPath fanlight-studio-v1.0.0-windows-portable-x86_64.zip
+
+      - name: Package Windows ARM64 Portable Bundle
+        run: |
+          mkdir -p release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\assets
+          xcopy /E /I /Y assets release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\assets
+          copy main.py release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+          copy ui.py release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+          copy widgets.py release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+          copy backend.py release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+          copy requirements.txt release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+          copy README.md release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+          copy LICENSE release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\
+
+          @"
+          @echo off
+          title FanLight Studio (Windows ARM64)
+          where python >nul 2>nul
+          if %ERRORLEVEL% NEQ 0 (
+              echo [ERROR] Python 3 is not found in PATH!
+              echo Please install Python 3 for Windows ARM64 from python.org or the Microsoft Store.
+              pause
+              exit /b 1
+          )
+          python -m pip install -q -r requirements.txt
+          start pythonw main.py
+          exit /b 0
+          "@ | Out-File -Encoding ASCII release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\run_fanlight.bat
+
+          @"
+          Set WshShell = CreateObject("WScript.Shell")
+          WshShell.Run "pythonw.exe main.py", 0, False
+          "@ | Out-File -Encoding ASCII release-staging-arm\fanlight-studio-v1.0.0-windows-arm64\launch_silent.vbs
+
+          Compress-Archive -Path release-staging-arm\fanlight-studio-v1.0.0-windows-arm64 -DestinationPath fanlight-studio-v1.0.0-windows-arm64.zip
+
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fanlight-studio-windows-x86_64
-          path: fanlight-studio-v1.0.0-windows-x86_64.zip
+          name: windows-packages
+          path: |
+            fanlight-studio-v1.0.0-windows-portable-x86_64.zip
+            fanlight-studio-v1.0.0-windows-arm64.zip
 
-  build-linux:
+  build-linux-x86_64:
     name: Build Linux x86_64 Binaries & Packages
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +131,7 @@ jobs:
         run: |
           pyinstaller --clean --onefile --windowed --name fanlight-studio-linux-x86_64 --add-data "assets:assets" main.py
 
-      - name: Build Debian (.deb) Package
+      - name: Build Debian (.deb) Package (amd64)
         run: |
           mkdir -p pkg/DEBIAN pkg/usr/bin pkg/usr/share/applications pkg/usr/share/icons/hicolor/128x128/apps pkg/etc/udev/rules.d
           
@@ -120,11 +182,99 @@ jobs:
           cp -r assets release-linux/fanlight-studio/
           tar -czf fanlight-studio-v1.0.0-linux-x86_64.tar.gz -C release-linux fanlight-studio
 
-      - name: Upload Linux Artifacts
+      - name: Upload Linux x86_64 Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-packages
+          name: linux-x86_64-packages
           path: |
             dist/fanlight-studio-linux-x86_64
             fanlight-studio_1.0.0_amd64.deb
             fanlight-studio-v1.0.0-linux-x86_64.tar.gz
+
+  build-linux-arm64:
+    name: Build Linux ARM64 Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Debian (.deb) Package (arm64)
+        run: |
+          mkdir -p pkg_arm64/DEBIAN pkg_arm64/opt/fanlight-studio pkg_arm64/usr/bin pkg_arm64/usr/share/applications pkg_arm64/usr/share/icons/hicolor/128x128/apps pkg_arm64/etc/udev/rules.d
+          
+          cat << 'EOF' > pkg_arm64/DEBIAN/control
+          Package: fanlight-studio
+          Version: 1.0.0
+          Architecture: arm64
+          Maintainer: FanLight Studio Contributors
+          Depends: python3 (>= 3.10), python3-pyqt6, python3-pil, python3-numpy
+          Section: utils
+          Priority: optional
+          Homepage: https://github.com/MdSagorMunshi/fanlight-controller
+          Description: Next-Generation Linux Desktop Lighting Deck for MSI AM5 & DDR5 RAM RGB (ARM64)
+          EOF
+
+          cat << 'EOF' > pkg_arm64/DEBIAN/postinst
+          #!/bin/sh
+          set -e
+          if command -v udevadm >/dev/null 2>&1; then
+              udevadm control --reload-rules || true
+              udevadm trigger || true
+          fi
+          exit 0
+          EOF
+          chmod 755 pkg_arm64/DEBIAN/postinst
+
+          cp -r assets main.py ui.py widgets.py backend.py requirements.txt pkg_arm64/opt/fanlight-studio/
+          
+          cat << 'EOF' > pkg_arm64/usr/bin/fanlight-studio
+          #!/bin/sh
+          exec /usr/bin/python3 /opt/fanlight-studio/main.py "$@"
+          EOF
+          chmod 755 pkg_arm64/usr/bin/fanlight-studio
+
+          cp assets/icon.png pkg_arm64/usr/share/icons/hicolor/128x128/apps/fanlight-studio.png
+          cp FanLightControl.desktop pkg_arm64/usr/share/applications/FanLightControl.desktop
+
+          cat << 'EOF' > pkg_arm64/etc/udev/rules.d/60-msi-mysticlight.rules
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0076", MODE="0666", TAG+="uaccess"
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0080", MODE="0666", TAG+="uaccess"
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0083", MODE="0666", TAG+="uaccess"
+          SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="0087", MODE="0666", TAG+="uaccess"
+          KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0666"
+          EOF
+
+          dpkg-deb --root-owner-group --build pkg_arm64 fanlight-studio_1.0.0_arm64.deb
+
+      - name: Build ARM64 Portable Tarball
+        run: |
+          mkdir -p release_arm/fanlight-studio-v1.0.0-linux-arm64
+          cp -r assets main.py ui.py widgets.py backend.py install.sh requirements.txt README.md LICENSE release_arm/fanlight-studio-v1.0.0-linux-arm64/
+          tar -czf fanlight-studio-v1.0.0-linux-arm64.tar.gz -C release_arm fanlight-studio-v1.0.0-linux-arm64
+
+      - name: Upload Linux ARM64 Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64-packages
+          path: |
+            fanlight-studio_1.0.0_arm64.deb
+            fanlight-studio-v1.0.0-linux-arm64.tar.gz
+
+  release:
+    name: Publish GitHub Release Assets
+    needs: [build-windows, build-linux-x86_64, build-linux-arm64]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-release
+          merge-multiple: true
+
+      - name: Publish Release to GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-release/*
+          generate_release_notes: true
