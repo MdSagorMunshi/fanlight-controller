@@ -132,12 +132,11 @@ graph TD
 
 ## 📦 Downloads & Prebuilt Packages
 
-Precompiled binaries and installation packages are available on the [GitHub Releases Page (v1.0.0)](https://github.com/MdSagorMunshi/fanlight-controller/releases/tag/v1.0.0):
+Official lightweight packages (~1.5 MB each) are available on the [GitHub Releases Page (v1.0.0)](https://github.com/MdSagorMunshi/fanlight-controller/releases/tag/v1.0.0):
 
 | Platform / Architecture | Package Format | Download Link | Quick Installation / Execution |
 | :--- | :--- | :--- | :--- |
-| **Linux (x86_64 / amd64)** | `.deb` Package | [`fanlight-studio_1.0.0_amd64.deb`](https://github.com/MdSagorMunshi/fanlight-controller/releases/download/v1.0.0/fanlight-studio_1.0.0_amd64.deb) | `sudo dpkg -i fanlight-studio_1.0.0_amd64.deb` |
-| **Linux (x86_64 / amd64)** | Standalone Binary | [`fanlight-studio-linux-x86_64`](https://github.com/MdSagorMunshi/fanlight-controller/releases/download/v1.0.0/fanlight-studio-linux-x86_64) | `chmod +x fanlight-studio-linux-x86_64 && ./fanlight-studio-linux-x86_64` |
+| **Linux (x86_64 / amd64)** | `.deb` Package | [`fanlight-studio_1.0.0_amd64.deb`](https://github.com/MdSagorMunshi/fanlight-controller/releases/download/v1.0.0/fanlight-studio_1.0.0_amd64.deb) | `sudo apt install ./fanlight-studio_1.0.0_amd64.deb` |
 | **Linux (x86_64 / amd64)** | Portable Tarball | [`fanlight-studio-v1.0.0-linux-x86_64.tar.gz`](https://github.com/MdSagorMunshi/fanlight-controller/releases/download/v1.0.0/fanlight-studio-v1.0.0-linux-x86_64.tar.gz) | `tar -xzf fanlight-studio-*.tar.gz && ./install.sh` |
 | **Linux (arm64 / aarch64)** | `.deb` Package | [`fanlight-studio_1.0.0_arm64.deb`](https://github.com/MdSagorMunshi/fanlight-controller/releases/download/v1.0.0/fanlight-studio_1.0.0_arm64.deb) | `sudo apt install ./fanlight-studio_1.0.0_arm64.deb` |
 | **Linux (arm64 / aarch64)** | Portable Tarball | [`fanlight-studio-v1.0.0-linux-arm64.tar.gz`](https://github.com/MdSagorMunshi/fanlight-controller/releases/download/v1.0.0/fanlight-studio-v1.0.0-linux-arm64.tar.gz) | `tar -xzf fanlight-studio-*.tar.gz && ./install.sh` |
