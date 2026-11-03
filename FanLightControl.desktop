@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=FanLight Studio
+GenericName=Fan & RGB Lighting Controller
+Comment=Control Fan Lights, Motherboard ARGB and DRAM colors
+Exec=fanlight-studio
+Icon=fanlight-studio
+Terminal=false
+Categories=Utility;HardwareSettings;Settings;
+StartupNotify=true
