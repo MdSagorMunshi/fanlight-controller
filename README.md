@@ -84,33 +84,36 @@ graph TD
 
 ## ✨ Features
 
-- **🖥️ Photorealistic 3D Rig Visualizer (`Chassis3DViewer`)**:
-  - Real-time compositing using NumPy and QImage with zero CPU overhead.
-  - Fans, cooler waterblock, and RAM glow dynamically with chosen colors and effects.
-  - Clickable targeting hotspots for **Case Fans (120 LEDs)** and **DDR5 RAM (8 LEDs)**.
+- **🌀 Independent Multi-Zone & Per-Fan Control**:
+  - Control all hardware together or customize each header independently:
+    - **Zone 1 (`JARGB_V2_1`)**: Front Intake Fans (120 LEDs)
+    - **Zone 2 (`JARGB_V2_2`)**: Top Radiator & Rear Exhaust Fans (120 LEDs)
+    - **Zone 3 (`ONBOARD` / `JRGB1`)**: Motherboard Trace LEDs & 12V Analog RGB
+    - **Zone 4 (`ENE DRAM`)**: DDR5 RAM Modules over SMBus (`0x72`)
+- **🌡️ Real-Time Hardware Temperature Reactive Lighting**:
+  - Direct kernel `/sys/class/hwmon` integration for AMD/Intel CPUs (`k10temp`/`coretemp`), AMD/NVIDIA GPUs, and DDR5 RAM (`spd5118`).
+  - Fluid thermal gradient mapping: $35^\circ\text{C}$ (Cool Cyan) ➔ $50^\circ\text{C}$ (Spring Green) ➔ $65^\circ\text{C}$ (Amber) ➔ $85^\circ\text{C}$ (Crimson Red).
+  - Assign temperature tracking globally or bind specific fans to specific sensors (e.g. Front Intake reacts to GPU heat, Top/Rear Exhaust reacts to CPU heat).
+- **🌊 30 FPS Software Procedural Animation Engine**:
+  - Volatile SRAM streaming (`buf[184] = 0`) updates lights smoothly with **zero flash wear**.
+  - **Cyberpunk Dual Wave**: Sinusoidal gradient sweep oscillating between Primary and Secondary colors.
+  - **Heartbeat Pulse**: Anatomical cardiac double-thump with natural exponential afterglow decay.
+  - **Aurora Borealis**: Multi-harmonic shifting polar light wave.
+  - **Police Flasher**: High-visibility alternating emergency strobe.
+- **⚡ Unlocked Microcontroller Hardware Modes**:
+  - Full access to MSI Mystic Light MCU built-in modes: **Meteor Shower**, **Lightning Storm**, **Planetary Orbit**, **Visor Scanner**, **Fire Ember**, **Stack Cascade**, and **Breathing Pulse**.
+  - **Dual-Color Support**: Customize secondary accent colors for dual-tone modes.
+- **🖥️ Photorealistic 3D Multi-Zone Rig Visualizer (`Chassis3DViewer`)**:
+  - Real-time compositing using partitioned NumPy masks and QImage.
+  - Each fan and RAM stick illuminates with its exact assigned zone color and animation in real time.
+  - Interactive clickable hotspots: click directly on any fan in the 3D model to switch to its controls.
 - **🎨 Studio-Grade Color Deck**:
-  - Precision 2D Saturation-Value canvas (Figma / macOS style).
-  - 360° Hue rainbow slider with custom glowing thumb ring.
-  - 10 curated quick-select vibrant color bubbles.
-- **✨ Balanced 2×4 Lighting Effects Matrix**:
-  - 🔆 **Static Glow** — Solid luminous tone
-  - 🌈 **Rainbow Wave** — 360° chromatic flow
-  - 💨 **Breathing Pulse** — Smooth cyclic fade
-  - 🔄 **Spectrum Loop** — Full spectrum shift
-  - ⚡ **Wave Cascade** — Dynamic light stream
-  - ✨ **Starry Twinkle** — Organic sparkle pulse
-  - 🔥 **Fire Ember** — Warm dynamic flame
-  - ⛔ **Stealth Off** — Zero lumen blackout
+  - Precision 2D Saturation-Value canvas (Figma / macOS style) + 360° Hue rainbow slider.
+  - Dual-color swatch selector for accent colors + 8 curated vibrant palette bubbles.
 - **🎛️ Glowing Linear Sliders**:
   - Fine-grained controls for **Brightness** (0–100%) and **Animation Speed** (0–100%).
-- **🌆 Atmospheric Presets**:
-  - Instant one-click profiles: *Cyberpunk 2077*, *Blood Dragon*, *Arctic Frost*, *Matrix Terminal*, and *Sunset Glow*.
 - **🔄 Bidirectional Live Hardware & State Sync**:
-  - Automatically queries live hardware registers on startup. If lights were powered off prior to closing, the UI restores in stealth blackout mode.
-  - Atomic configuration caching in `~/.config/fanlight-controller/state.json`.
-- **🚀 Standalone Background Operation**:
-  - No external OpenRGB window or manual launch needed. All services run headlessly.
-  - Minimize to system tray with quick-toggle context actions.
+  - Live hardware register query on startup + atomic configuration caching in `~/.config/fanlight-controller/state.json`.
 
 ---
 
