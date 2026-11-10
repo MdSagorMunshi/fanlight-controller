@@ -803,3 +803,8 @@ class FanLightStudioWindow(QMainWindow):
     def on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.toggle_window()
+
+
+# Backward compatibility alias
+FanLightApp = FanLightStudioWindow
+
